@@ -30,6 +30,9 @@ target_include_directories(Genexpr_Only_Proj_Second
     $<TARGET_PROPERTY:Proj::Headers,INTERFACE_INCLUDE_DIRECTORIES>/proj
 )
 
+# Compiles
+add_executable(Link_And_Workaround source.c)
+
 get_target_property(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES Proj::Headers INTERFACE_INCLUDE_DIRECTORIES)
 
 if(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES MATCHES "BUILD_INTERFACE")
@@ -45,8 +48,6 @@ if(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES MATCHES "BUILD_INTERFACE")
   set(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_MATCH_1}")
 endif()
 
-# Compiles
-add_executable(Link_And_Workaround source.c)
 target_link_libraries(Link_And_Workaround
   PRIVATE Proj::Headers)
 target_include_directories(Link_And_Workaround
