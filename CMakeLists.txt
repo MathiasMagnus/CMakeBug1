@@ -29,3 +29,27 @@ target_include_directories(Genexpr_Only_Proj_Second
     $<TARGET_PROPERTY:Proj::Headers,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:Proj::Headers,INTERFACE_INCLUDE_DIRECTORIES>/proj
 )
+
+get_target_property(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES Proj::Headers INTERFACE_INCLUDE_DIRECTORIES)
+
+if(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES MATCHES "BUILD_INTERFACE")
+  # When building Proj::Headers is part of this build, we have a property like for eg.
+  # $<BUILD_INTERFACE:C:/SDK/Headers>;$<INSTALL_INTERFACE:include>
+  # and need to touch up this property. We want the BUILD_INTERFACE part only.
+  # When Proj::Headers is consumed through a Package Config file, this property
+  # no longer holds unevaluated generator expressions.
+  string(REGEX MATCHALL
+    [[\$<BUILD_INTERFACE:(.*)>;]]
+    PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES
+    "${PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES}")
+  set(PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_MATCH_1}")
+endif()
+
+# Compiles
+add_executable(Link_And_Workaround source.c)
+target_link_libraries(Link_And_Workaround
+  PRIVATE Proj::Headers)
+target_include_directories(Link_And_Workaround
+  PRIVATE
+    ${PROJ_HEADERS_INTERFACE_INCLUDE_DIRECTORIES}/proj
+)
